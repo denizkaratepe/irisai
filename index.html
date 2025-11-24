@@ -233,6 +233,7 @@
     };
     
     // GEMINI API Key'i tekrar kodun içine gömüldü (Yalnızca MVP/Demo için!)
+    const API_KEY = "AIzaSyA-ReSN0vUZhxTKiQGdHF7t7l7ylXkPO4c"; 
     const MODEL_ID = "gemini-2.5-flash"; // En güncel ve hızlı motor
 
     // FIREBASE UYGULAMASINI BAŞLAT
@@ -333,6 +334,7 @@
     ];
 
     async function startAnalysis() {
+        // HATA GİDERİLDİ: Input değerleri artık burada çekiliyor
         const brand = document.getElementById('brandInput').value;
         const industry = document.getElementById('industryInput').value;
 
@@ -352,7 +354,7 @@
         // ---------------------------------------------
         // YENİ İKİ AŞAMALI RAG/ANALİZ MANTIĞI BAŞLANGIÇ
         // ---------------------------------------------
-        let raw_rag_data = "Harici veri çekilemedi. Analizi içsel bilgiyle yap."; // Başlangıç değeri
+        let raw_rag_data = "Harici veri çekilemedi. Analizi içsel bilgiyle yap."; 
 
         const RAG_PROMPT = `
             Sen bir pazar istihbarat analistisin.
@@ -381,14 +383,12 @@
             
             if (ragResult.error) {
                 console.warn(`RAG Hatası: ${ragResult.error.message}. İkinci adıma devam ediliyor.`);
-                // Hata durumunda raw_rag_data varsayılan (error) değerinde kalır
             } else {
                 raw_rag_data = ragResult.candidates[0].content.parts[0].text;
             }
             
         } catch (error) {
             console.error("1. Adım (RAG) Başarısız:", error);
-            // raw_rag_data varsayılan değerinde kalır (içsel bilgiyle analiz)
         }
         
         // 2. ADIM: ANALİZ VE KESİN JSON FORMATLAMA
@@ -435,8 +435,7 @@
             clearInterval(loadingInterval);
         }
     }
-    // ... (Geri kalan fonksiyonlar aynıdır)
-    
+
     function renderResults(data) {
         // Verileri Yerleştir
         document.getElementById('resBrandName').innerText = document.getElementById('brandInput').value.toUpperCase();
@@ -511,7 +510,5 @@
         showSection('section-results');
     }
 </script>
-</body>
-</html>
 </body>
 </html>
