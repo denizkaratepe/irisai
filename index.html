@@ -214,6 +214,7 @@
 
     </main>
 
+
 <script>
     // İkonları başlat
     lucide.createIcons();
@@ -232,8 +233,7 @@
       appId: "1:4644155110:web:eb28428f07920a68585527"
     };
     
-    // GEMINI API Key'i tekrar kodun içine gömüldü (Yalnızca MVP/Demo için!)
-    const API_KEY = "AIzaSyA-ReSN0vUZhxTKiQGdHF7t7l7ylXkPO4c"; 
+    // SİLİNDİ: const API_KEY = "AIzaSyA-ReSN0vUZhxTKiQGdHF7t7l7ylXkPO4c"; // Functions'tan geliyor
     const MODEL_ID = "gemini-2.5-flash"; // En güncel ve hızlı motor
 
     // FIREBASE UYGULAMASINI BAŞLAT
@@ -327,14 +327,14 @@
     let loadingInterval;
     const messages = [
         "Gemini Motoruna Bağlanılıyor...",
-        "Google Intelligence Ağı Taranıyor...",
+        "Google Intelligence Ağını Tarıyor...",
         "Derin Mantıksal Analiz (Reasoning)...",
         "Semantik Otorite Puanlanıyor...",
         "Stratejik Rapor Hazırlanıyor..."
     ];
 
     async function startAnalysis() {
-        // HATA GİDERİLDİ: Input değerleri artık burada çekiliyor
+        // Input değerleri alınıyor
         const brand = document.getElementById('brandInput').value;
         const industry = document.getElementById('industryInput').value;
 
@@ -374,7 +374,6 @@
                     contents: [{
                         parts: [{ text: RAG_PROMPT }]
                     }],
-                    // RAG aracı burada aktif.
                     tools: [{ googleSearch: {} }] 
                 })
             });
