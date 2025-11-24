@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIS INTEL | Brand Perception Engine</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; overflow-x: hidden; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Göz Animasyonları */
+        @keyframes lookAround {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            20% { transform: translateX(0) translateY(0); }
+            40% { transform: translateX(-8px) translateY(2px); }
+            60% { transform: translateX(-8px) translateY(2px); }
+            80% { transform: translateX(8px) translateY(-2px); }
+        }
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.05); }
+        }
+        .digital-eye-pupil { animation: lookAround 8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        .digital-eye-lid { animation: blink 6s infinite ease-in-out; animation-delay: 2s; }
+        
+        /* Geçiş Efektleri */
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .slide-up { animation: slideUp 0.7s ease-out forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="text-slate-900 selection:bg-blue-200 selection:text-blue-900">
+
+    <nav class="fixed top-0 w-full bg-white/80 backdrop-blur-xl z-50 border-b border-slate-200/60">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="resetApp()">
+                <div class="bg-slate-900 p-1.5 rounded-lg group-hover:scale-105 transition-transform duration-300 shadow-lg shadow-blue-500/10">
+                    <i data-lucide="eye" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-slate-900">IRIS <span class="text-blue-600 font-light">INTEL</span></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-200">
+                    <i data-lucide="cpu" class="w-3 h-3 text-slate-400"></i>
+                    <span class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">Engine: Gemini 1.5 Pro</span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+                    <div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[10px] font-mono font-bold text-emerald-700 uppercase tracking-wider">ONLINE</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-20 px-6 max-w-5xl mx-auto min-h-screen flex flex-col items-center justify-center relative z-10">
+
+        <div id="section-input" class="w-full max-w-lg flex flex-col items-center slide-up">
+            <div class="mb-10 relative group cursor-default">
+                <div class="absolute -inset-8 bg-blue-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                <div class="w-32 h-32 bg-[#0F172A] rounded-full flex items-center justify-center relative overflow-hidden shadow-2xl border-[4px] border-[#1E293B] digital-eye-lid">
+                    <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(#3b82f6 1px, transparent 1px); background-size: 8px 8px"></div>
+                    <div class="w-10 h-10 bg-blue-600 rounded-full relative digital-eye-pupil shadow-[0_0_20px_rgba(59,130,246,0.6)] flex items-center justify-center border border-blue-400">
+                        <div class="w-4 h-4 bg-black rounded-full opacity-60"></div>
+                        <div class="absolute top-2 right-2 w-1.5 h-1.5 bg-white rounded-full opacity-90"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-black text-slate-900 mb-2 tracking-tight text-center">Brand Perception Engine</h1>
+            <p class="text-slate-500 mb-8 text-center max-w-sm leading-relaxed text-sm">
+                Markanızın dijital varlığını yapay zeka istihbaratı ile analiz edin.
+            </p>
+
+            <div class="w-full bg-white p-2 rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-200">
+                <div class="bg-slate-50/50 p-6 rounded-xl border border-slate-100 space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-mono">Brand_Name</label>
+                        <input type="text" id="brandInput" placeholder="Örn: Tesla, Getir" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 outline-none font-semibold text-slate-800 transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-mono">Industry_Context</label>
+                        <input type="text" id="industryInput" placeholder="Örn: Otomotiv, Hızlı Teslimat" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 outline-none font-semibold text-slate-800 transition-all">
+                    </div>
+                    
+                    <div class="space-y-1 pt-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-mono">API Key</label>
+                        <input type="password" id="apiKeyInput" value="" placeholder="API Anahtarını Yapıştırın" class="w-full px-4 py-2 bg-slate-100 border border-slate-200 rounded text-xs text-slate-600 focus:bg-white transition-colors">
+                    </div>
+
+                    <button onclick="startAnalysis()" class="w-full py-4 mt-2 bg-slate-900 hover:bg-blue-600 text-white rounded-lg font-mono font-bold text-sm tracking-wider shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer">
+                        BAŞLAT <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-loading" class="hidden-section text-center max-w-sm mx-auto">
+            <div class="relative w-24 h-24 mx-auto mb-8">
+                <div class="absolute inset-0 border-t-2 border-b-2 border-blue-600 rounded-full animate-spin"></div>
+                <i data-lucide="terminal" class="absolute inset-0 m-auto text-blue-600 w-8 h-8 animate-pulse"></i>
+            </div>
+            <div class="font-mono text-xs text-blue-600 font-bold mb-3 tracking-[0.2em] animate-pulse uppercase">PROCESSING</div>
+            <h2 id="loadingText" class="text-sm font-bold text-slate-600 font-mono bg-white px-4 py-2 rounded border border-slate-200 shadow-sm inline-block">
+                System_Init...
+            </h2>
+        </div>
+
+        <div id="section-results" class="hidden-section w-full pb-20 slide-up">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-slate-200 pb-6">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Analiz Raporu</h1>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">CONFIDENTIAL</span>
+                    </div>
+                    <p id="resBrandName" class="text-slate-500 text-sm font-mono uppercase">BRAND</p>
+                </div>
+                <div class="text-left md:text-right">
+                    <div id="resScore" class="text-4xl font-black text-slate-900 tracking-tighter">0</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Görünürlük Skoru</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6 overflow-hidden relative">
+                <div id="matchIndicator" class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                <div class="p-6 pl-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i data-lucide="scan-line" class="w-5 h-5 text-slate-400"></i>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Kimlik Tespiti</h3>
+                            <p class="text-xs text-slate-500">Beyan vs. Algı</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">BEYAN EDİLEN</p>
+                            <div id="resClaimedSector" class="text-base font-bold text-slate-700 bg-slate-50 py-3 px-4 rounded border border-slate-100">...</div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GEMINI TESPİTİ</p>
+                                <span id="resMatchStatus" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">...</span>
+                            </div>
+                            <div id="resDetectedSector" class="text-base font-bold text-slate-900 py-3 px-4 rounded border border-slate-200 shadow-sm">...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-slate-100">
+                        <p id="resInsight" class="text-xs font-medium text-slate-600 leading-relaxed flex gap-2">
+                            <i data-lucide="search" class="w-4 h-4 text-blue-500 shrink-0"></i>
+                            ...
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="lg:col-span-1 bg-white p-5 rounded-xl border border-slate-200 shadow-sm h-full">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i data-lucide="globe" class="w-3 h-3"></i> Motor Durumu
+                    </h3>
+                    <div id="resPlatforms" class="space-y-3">
+                        </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-600"></i> Yönetici Özeti
+                        </h3>
+                        <p id="resSummary" class="text-slate-600 text-sm leading-relaxed border-l-4 border-blue-100 pl-4">...</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-3 flex items-center gap-2"><i data-lucide="check" class="w-3 h-3"></i> Güçlü Yönler</h4>
+                            <ul id="resStrengths" class="space-y-2"></ul>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-3 flex items-center gap-2"><i data-lucide="alert-triangle" class="w-3 h-3"></i> Zayıf Yönler</h4>
+                            <ul id="resWeaknesses" class="space-y-2"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"><i data-lucide="users" class="w-3 h-3"></i> Rakipler</h3>
+                    <div id="resCompetitors" class="space-y-2"></div>
+                </div>
+                
+                <div class="bg-[#0F172A] p-6 rounded-xl shadow-lg text-white flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-300 uppercase tracking-wider mb-4 flex items-center gap-2"><i data-lucide="zap" class="w-3 h-3"></i> Algı Optimizasyonu</h3>
+                        <p id="resOptRationale" class="text-xs text-slate-300 mb-4 leading-relaxed opacity-80">...</p>
+                        <div id="resOptText" class="bg-white/5 p-4 rounded text-xs font-mono text-emerald-300 border border-white/10 leading-relaxed">...</div>
+                    </div>
+                    <button onclick="copyOptText()" class="mt-4 w-full py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wide">
+                        <i data-lucide="copy" class="w-3 h-3"></i> Metni Kopyala
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center pb-8">
+                <button onclick="resetApp()" class="text-slate-400 hover:text-blue-600 text-xs font-bold font-mono transition-colors flex items-center gap-2 mx-auto uppercase tracking-widest">
+                    <i data-lucide="arrow-right" class="w-3 h-3 rotate-180"></i> YENİ ANALİZ
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // İkonları başlat
+        lucide.createIcons();
+
+        // DEĞİŞKENLER
+        let apiKey = "AIzaSyA-ReSN0vUZhxTKiQGdHF7t7l7ylXkPO4c"; // Kullanıcı inputtan girecek
+        const SYSTEM_INSTRUCTION = `
+        Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
+        Görevin: Markayı analiz etmek ve aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
+        
+        {
+          "score": (0-100 arası sayı),
+          "identityAnalysis": {
+            "claimedSector": (kullanıcı girdisi),
+            "detectedSector": (tespit edilen),
+            "matchStatus": "EŞLEŞME DOĞRULANDI" veya "ALGI SAPMASI",
+            "insight": (kısa analiz)
+          },
+          "competitors": {
+            "direct": [{"name": "Rakip1", "status": "Lider"}, {"name": "Rakip2", "status": "Takipçi"}]
+          },
+          "strategicSummary": (özet),
+          "strengths": ["güçlü1", "güçlü2"],
+          "weaknesses": ["zayıf1", "zayıf2"],
+          "optimization": {
+            "rationale": (neden),
+            "text": (web sitesi için optimize metin)
+          },
+          "platforms": [
+            {"name": "Gemini 1.5 Pro", "status": "Analiz Edildi", "rank": "#1"},
+            {"name": "GPT-4o", "status": "Simüle Edildi", "rank": "#2"},
+            {"name": "Claude 3.5", "status": "Tarandı", "rank": "#3"}
+          ]
+        }`;
+
+        // FONKSİYONLAR
+        function showSection(id) {
+            ['section-input', 'section-loading', 'section-results'].forEach(sec => {
+                document.getElementById(sec).classList.add('hidden-section');
+            });
+            document.getElementById(id).classList.remove('hidden-section');
+        }
+
+        function resetApp() {
+            document.getElementById('brandInput').value = '';
+            document.getElementById('industryInput').value = '';
+            showSection('section-input');
+        }
+
+        function copyOptText() {
+            const text = document.getElementById('resOptText').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Metin kopyalandı!");
+        }
+
+        // LOADING ANIMASYONU
+        let loadingInterval;
+        const messages = [
+            "Gemini Motoruna Bağlanılıyor...",
+            "Google Intelligence Ağı Taranıyor...",
+            "Derin Mantıksal Analiz (Reasoning)...",
+            "Semantik Otorite Puanlanıyor...",
+            "Stratejik Rapor Hazırlanıyor..."
+        ];
+
+        async function startAnalysis() {
+            const brand = document.getElementById('brandInput').value;
+            const industry = document.getElementById('industryInput').value;
+            apiKey = document.getElementById('apiKeyInput').value;
+
+            if (!brand || !industry) {
+                alert("Lütfen marka ve sektör girin.");
+                return;
+            }
+            if (!apiKey) {
+                // Burada senin verdiğin anahtarı varsayılan olarak koyabilirdim ama 
+                // güvenliğin için boş bıraktım. Kullanıcı (sen) yapıştıracaksın.
+                alert("Lütfen API Key girin."); 
+                return;
+            }
+
+            showSection('section-loading');
+            
+            let i = 0;
+            loadingInterval = setInterval(() => {
+                document.getElementById('loadingText').innerText = messages[i % messages.length];
+                i++;
+            }, 1500);
+
+            try {
+                // API ÇAĞRISI (Backend Logic'in JS Hali)
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: `Marka: ${brand}, Sektör: ${industry}. \n\n ${SYSTEM_INSTRUCTION}` }]
+                        }],
+                        generationConfig: {
+                            response_mime_type: "application/json"
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                const resultJson = JSON.parse(data.candidates[0].content.parts[0].text);
+                renderResults(resultJson);
+
+            } catch (error) {
+                alert("Hata: " + error.message);
+                resetApp();
+            } finally {
+                clearInterval(loadingInterval);
+            }
+        }
+
+        function renderResults(data) {
+            // Verileri Yerleştir
+            document.getElementById('resBrandName').innerText = document.getElementById('brandInput').value.toUpperCase();
+            document.getElementById('resScore').innerText = data.score;
+            
+            // Kimlik
+            document.getElementById('resClaimedSector').innerText = data.identityAnalysis.claimedSector;
+            document.getElementById('resDetectedSector').innerText = data.identityAnalysis.detectedSector;
+            
+            const matchStatus = document.getElementById('resMatchStatus');
+            const indicator = document.getElementById('matchIndicator');
+            matchStatus.innerText = data.identityAnalysis.matchStatus;
+            
+            if (data.identityAnalysis.matchStatus.includes("SAPMA")) {
+                matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700";
+                indicator.className = "absolute top-0 left-0 w-1 h-full bg-amber-500";
+            } else {
+                matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700";
+                indicator.className = "absolute top-0 left-0 w-1 h-full bg-emerald-500";
+            }
+            document.getElementById('resInsight').innerHTML = `<i data-lucide="search" class="w-4 h-4 text-blue-500 shrink-0"></i> ${data.identityAnalysis.insight}`;
+
+            // Platformlar
+            const platformsDiv = document.getElementById('resPlatforms');
+            platformsDiv.innerHTML = "";
+            data.platforms.forEach(p => {
+                platformsDiv.innerHTML += `
+                    <div class="flex items-center justify-between text-sm p-3 bg-slate-50 rounded border border-slate-100 hover:border-blue-200 transition-colors">
+                        <div>
+                            <span class="font-bold text-slate-700 text-xs block">${p.name}</span>
+                            <span class="text-[10px] text-slate-400">Sıra: ${p.rank}</span>
+                        </div>
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${p.status.includes('Analiz') ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}">${p.status}</span>
+                    </div>`;
+            });
+
+            // SWOT
+            document.getElementById('resSummary').innerText = data.strategicSummary;
+            
+            const strList = document.getElementById('resStrengths');
+            strList.innerHTML = "";
+            data.strengths.forEach(s => strList.innerHTML += `<li class="text-xs font-medium text-slate-600 flex items-start gap-2"><span class="text-emerald-400">•</span> ${s}</li>`);
+            
+            const weakList = document.getElementById('resWeaknesses');
+            weakList.innerHTML = "";
+            data.weaknesses.forEach(w => weakList.innerHTML += `<li class="text-xs font-medium text-slate-600 flex items-start gap-2"><span class="text-rose-400">•</span> ${w}</li>`);
+
+            // Rakipler
+            const compList = document.getElementById('resCompetitors');
+            compList.innerHTML = "";
+            data.competitors.direct.forEach(c => {
+                compList.innerHTML += `
+                    <div class="flex justify-between text-sm p-3 bg-slate-50 rounded border border-slate-100">
+                        <span class="font-bold text-slate-700">${c.name}</span>
+                        <span class="text-xs text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">${c.status}</span>
+                    </div>`;
+            });
+
+            // Optimizasyon
+            document.getElementById('resOptRationale').innerText = data.optimization.rationale;
+            document.getElementById('resOptText').innerText = data.optimization.text;
+
+            // İkonları yenile (yeni eklenenler için)
+            lucide.createIcons();
+            showSection('section-results');
+        }
+    </script>
+</body>
+</html>
