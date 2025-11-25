@@ -214,8 +214,6 @@
         </div>
 
     </main>
-
-
 <script>
     // İkonları başlat
     lucide.createIcons();
@@ -234,24 +232,18 @@
       appId: "1:4644155110:web:eb28428f07920a68585527"
     };
     
-    // API KEY VE MODEL ID ARTIK FUNCTIONS'DAN GELİYOR (SİLİNMELİ!)
-    // const API_KEY = "AIzaSyA-ReSN0vUZhxTKiQGdHF7t7l7ylXkPO4c"; // ESKİ KEY
-    const MODEL_ID = "gemini-2.5-flash"; // GEREKSİZ, Functions içinde tanımlı olmalı
-
     // FIREBASE UYGULAMASINI BAŞLAT
     const firebaseApp = firebase.initializeApp(firebaseConfig);
     const db = firebaseApp.firestore(); // Firestore bağlantısı
     // YENİ: Functions bağlantısı kuruluyor
     const functions = firebaseApp.functions('europe-west1'); // Sunucu bölgeni kontrol et!
-    
-    // ----------------------------------------------------
-    // SYSTEM INSTRUCTION (KURALLAR VE GÜNCEL JSON ŞEMASI)
-    // ----------------------------------------------------
-    
-    // SYSTEM_INSTRUCTION'ın tamamı (JSON Şeması dahil) FUNCTIONS'a taşınmalıdır.
-    // Ancak fonksiyon mantığı için bu değerleri parametre olarak tutmalıyız.
-    // Bu mantık, Functions'ı çağıran yeni fonksiyonla değiştirilmelidir.
 
+    // ----------------------------------------------------
+    // YÖNERGE DEPOLAMA ALANI (DEBUG AMAÇLI GÖRÜNÜR TUTULMUŞTUR)
+    // ----------------------------------------------------
+    
+    // Bu promptlar, Backend'de (functions/index.js) de aynı olmalıdır.
+    
     const SYSTEM_INSTRUCTION = `
     Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
     Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
@@ -291,6 +283,14 @@
         {"name": "Claude", "status": "Tarandı"}
       ]
     }`;
+    
+    const RAG_PROMPT = `
+        Sen bir pazar istihbarat analistisin.
+        Marka: {brand}, Sektör: {industry} için Google Search RAG aracını kullanarak en güncel (son 6 ay) pazar algısı, rekabet durumu ve önemli haberleri topla.
+        Tüm bulgularını (rakipler, trendler, olumlu/olumsuz algılar) detaylı ve ham metin formatında özetle.
+        KESİNLİKLE JSON formatı kullanma. Çıktın sadece sade metin olmalıdır.
+    `;
+
 
     // ----------------------------------------------------
     // FONKSİYONLAR
@@ -326,7 +326,7 @@
     }
 
     function copyOptText() {
-        const text = document.getElementById('resOptRationale').innerText; // Optimizasyon metni yerine Rationale'ı al
+        const text = document.getElementById('resOptRationale').innerText;
         navigator.clipboard.writeText(text);
         alert("Metin kopyalandı!");
     }
@@ -413,7 +413,6 @@
             matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700";
             indicator.className = "absolute top-0 left-0 w-1 h-full bg-emerald-500";
         }
-        // MOR FONTA ÇEVRİLDİ
         document.getElementById('resInsight').innerHTML = `<i data-lucide="search" class="w-4 h-4 text-purple-500 shrink-0"></i> ${data.identityAnalysis.insight}`;
 
         // Platformlar (Rank'ler silindi)
