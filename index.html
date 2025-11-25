@@ -77,7 +77,7 @@
 
             <h1 class="text-3xl font-black text-slate-900 mb-2 tracking-tight text-center">Brand Perception Engine</h1>
             <p class="text-slate-500 mb-8 text-center max-w-sm leading-relaxed text-sm">
-                Markanızın dijital varlığını yapay zeka istihbaratı ile analiz edin. v2
+                Markanızın dijital varlığını yapay zeka istihbaratı ile analiz edin. v4
             </p>
 
             <div class="w-full bg-white p-2 rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-200">
@@ -215,255 +215,256 @@
 
     </main>
 <script>
-    // İkonları başlat
-    lucide.createIcons();
+ // İkonları başlat
+lucide.createIcons();
 
-    // ----------------------------------------------------
-    // SYSTEM CONFIG & FIREBASE BAĞLANTISI
-    // ----------------------------------------------------
-    
-    // 🔥 FIREBASE KONFİGÜRASYONU (Firestore için gereklidir)
-    const firebaseConfig = {
-      apiKey: "AIzaSyAsJvJjPRWRnv6R3u2K9sPeug6rh9IqoEM", 
-      authDomain: "iris-intel.firebaseapp.com",
-      projectId: "iris-intel",
-      storageBucket: "iris-intel.firebasestorage.app",
-      messagingSenderId: "4644155110",
-      appId: "1:4644155110:web:eb28428f07920a68585527"
-    };
-    
-    // FIREBASE UYGULAMASINI BAŞLAT
-    const firebaseApp = firebase.initializeApp(firebaseConfig);
-    const db = firebaseApp.firestore(); // Firestore bağlantısı
-    const functions = firebaseApp.functions('europe-west1'); // Sunucu bölgeni kontrol et!
+// ----------------------------------------------------
+// SYSTEM CONFIG & FIREBASE BAĞLANTISI
+// ----------------------------------------------------
 
-    // ----------------------------------------------------
-    // YÖNERGE DEPOLAMA ALANI (GÖRÜNÜR TUTULMUŞTUR)
-    // ----------------------------------------------------
-    
-    // Bu promptlar sadece frontend'de görülmek için burada, backend'e gönderilmiyor.
-    
-    const SYSTEM_INSTRUCTION = `
-    Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
-    Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
+// 🔥 FIREBASE KONFİGÜRASYONU (Firestore için gereklidir)
+const firebaseConfig = {
+  apiKey: "AIzaSyAZa9QxVQJ85K8EKCTOWjoM7NYpmnJj8Hk", 
+  authDomain: "iris-intel.firebaseapp.com",
+  projectId: "iris-intel",
+  storageBucket: "iris-intel.firebasestorage.app",
+  messagingSenderId: "4644155110",
+  appId: "1:4644155110:web:eb28428f07920a68585527"
+};
 
-    KURALLAR:
-    1. GERÇEKLİK: Marka hakkında yeterli veri yoksa (çok yeni/çok niş ise) dürüstçe "Yetersiz Veri" de.
-    2. KİMLİK KONTROLÜ: Kullanıcının beyanı ile dijital ayak izi uyuşmuyorsa "ALGI SAPMASI" uyarısı ver.
-    3. FORMAT: Sadece geçerli JSON döndür.
+// FIREBASE UYGULAMASINI BAŞLAT
+const firebaseApp = firebase.initializeApp(firebaseConfig);
+const db = firebaseApp.firestore(); // Firestore bağlantısı
+// YENİ: Functions bağlantısı kuruluyor (Bölge Düzeltildi: europe-west3 - Frankfurt)
+const functions = firebaseApp.functions('europe-west3'); 
 
-    Marka: {brand}
-    Sektör: {industry}
+// ----------------------------------------------------
+// YÖNERGE DEPOLAMA ALANI (DEBUG AMAÇLI GÖRÜNÜR TUTULMUŞTUR)
+// ----------------------------------------------------
 
-    JSON ŞEMASI:
-    {
-      "score": (0-100 arası sayı. Dijital görünürlük ve algı skoru),
-      "identityAnalysis": {
-        "claimedSector": (str - Kullanıcının girdiği),
-        "detectedSector": (str - Senin tespitin),
-        "matchStatus": ("EŞLEŞME DOĞRULANDI" veya "ALGI SAPMASI" veya "Yetersiz Veri"),
-        "insight": (str - Kısa durum analizi)
-      },
-      "competitors": {
-        "direct": [{"name": "str", "status": "str - Örn: Rakip"}, {"name": "str", "status": "str - Örn: Rakip"}], 
-        "leaders": [{"name": "str", "status": "str - Örn: Lider"}, {"name": "str", "status": "str - Örn: Lider"}]
-      },
-      "strategicSummary": (str - Yönetici özeti),
-      "strengths": [(str - Güçlü1), (str - Güçlü2)],
-      "weaknesses": [(str - Zayıf1), (str - Zayıf2)],
-      "optimization": {
-        "objective": (str - Ana hedef, Örn: Sosyal kanıt artışı),
-        "rationale": (str - Neden bu hedef seçildiğinin analizi),
-        "text": (str - Web sitesi için optimize edilmiş metin)
-      },
-      "platforms": [
-        {"name": "Gemini", "status": "Analiz Edildi"}, 
-        {"name": "GPT-5", "status": "Simüle Edildi"},
-        {"name": "Claude", "status": "Tarandı"}
-      ]
-    }`;
-    
-    const RAG_PROMPT = `
-        Sen bir pazar istihbarat analistisin.
-        Marka: {brand}, Sektör: {industry} için Google Search RAG aracını kullanarak en güncel (son 6 ay) pazar algısı, rekabet durumu ve önemli haberleri topla.
-        Tüm bulgularını (rakipler, trendler, olumlu/olumsuz algılar) detaylı ve ham metin formatında özetle.
-        KESİNLİKLE JSON formatı kullanma. Çıktın sadece sade metin olmalıdır.
-    `;
+// Bu promptlar, backend'de kullanılan şemaları temsil eder.
+
+const SYSTEM_INSTRUCTION = `
+Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
+Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
+
+KURALLAR:
+1. GERÇEKLİK: Marka hakkında yeterli veri yoksa (çok yeni/çok niş ise) dürüstçe "Yetersiz Veri" de.
+2. KİMLİK KONTROLÜ: Kullanıcının beyanı ile dijital ayak izi uyuşmuyorsa "ALGI SAPMASI" uyarısı ver.
+3. FORMAT: Sadece geçerli JSON döndür.
+
+Marka: {brand}
+Sektör: {industry}
+
+JSON ŞEMASI:
+{
+  "score": (0-100 arası sayı. Dijital görünürlük ve algı skoru),
+  "identityAnalysis": {
+    "claimedSector": (str - Kullanıcının girdiği),
+    "detectedSector": (str - Senin tespitin),
+    "matchStatus": ("EŞLEŞME DOĞRULANDI" veya "ALGI SAPMASI" veya "Yetersiz Veri"),
+    "insight": (str - Kısa durum analizi)
+  },
+  "competitors": {
+    "direct": [{"name": "str", "status": "str - Örn: Rakip"}, {"name": "str", "status": "str - Örn: Rakip"}], 
+    "leaders": [{"name": "str", "status": "str - Örn: Lider"}, {"name": "str", "status": "str - Örn: Lider"}]
+  },
+  "strategicSummary": (str - Yönetici özeti),
+  "strengths": [(str - Güçlü1), (str - Güçlü2)],
+  "weaknesses": [(str - Zayıf1), (str - Zayıf2)],
+  "optimization": {
+    "objective": (str - Ana hedef, Örn: Sosyal kanıt artışı),
+    "rationale": (str - Neden bu hedef seçildiğinin analizi),
+    "text": (str - Web sitesi için optimize edilmiş metin)
+  },
+  "platforms": [
+    {"name": "Gemini", "status": "Analiz Edildi"}, 
+    {"name": "GPT-5", "status": "Simüle Edildi"},
+    {"name": "Claude", "status": "Tarandı"}
+  ]
+}`;
+
+const RAG_PROMPT = `
+    Sen bir pazar istihbarat analistisin.
+    Marka: {brand}, Sektör: {industry} için Google Search RAG aracını kullanarak en güncel (son 6 ay) pazar algısı, rekabet durumu ve önemli haberleri topla.
+    Tüm bulgularını (rakipler, trendler, olumlu/olumsuz algılar) detaylı ve ham metin formatında özetle.
+    KESİNLİKLE JSON formatı kullanma. Çıktın sadece sade metin olmalıdır.
+`;
 
 
-    // ----------------------------------------------------
-    // FONKSİYONLAR
-    // ----------------------------------------------------
-    
-    async function saveAnalysis(analysisData, brand, industry) {
-        try {
-            await db.collection("reports").add({
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                brand: brand,
-                industry: industry,
-                score: analysisData.score,
-                summary: analysisData.strategicSummary,
-                fullReport: analysisData 
-            });
-            console.log(`Rapor başarıyla kaydedildi: ${brand}`);
-        } catch (e) {
-            console.error("Veritabanına Kritik Kayıt Hatası: ", e);
-        }
-    }
-    
-    function showSection(id) {
-        ['section-input', 'section-loading', 'section-results'].forEach(sec => {
-            document.getElementById(sec).classList.add('hidden-section');
+// ----------------------------------------------------
+// FONKSİYONLAR
+// ----------------------------------------------------
+
+async function saveAnalysis(analysisData, brand, industry) {
+    try {
+        await db.collection("reports").add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            brand: brand,
+            industry: industry,
+            score: analysisData.score,
+            summary: analysisData.strategicSummary,
+            fullReport: analysisData 
         });
-        document.getElementById(id).classList.remove('hidden-section');
+        console.log(`Rapor başarıyla kaydedildi: ${brand}`);
+    } catch (e) {
+        console.error("Veritabanına Kritik Kayıt Hatası: ", e);
+    }
+}
+
+function showSection(id) {
+    ['section-input', 'section-loading', 'section-results'].forEach(sec => {
+        document.getElementById(sec).classList.add('hidden-section');
+    });
+    document.getElementById(id).classList.remove('hidden-section');
+}
+
+function resetApp() {
+    document.getElementById('brandInput').value = '';
+    document.getElementById('industryInput').value = '';
+    showSection('section-input');
+}
+
+function copyOptText() {
+    const text = document.getElementById('resOptRationale').innerText;
+    navigator.clipboard.writeText(text);
+    alert("Metin kopyalandı!");
+}
+
+// LOADING ANIMASYONU
+let loadingInterval;
+const messages = [
+    "Gemini Motoruna Bağlanılıyor...",
+    "Google Intelligence Ağını Tarıyor...",
+    "Derin Mantıksal Analiz (Reasoning)...",
+    "Semantik Otorite Puanlanıyor...",
+    "Stratejik Rapor Hazırlanıyor..."
+];
+
+async function startAnalysis() {
+    // Input değerleri alınıyor
+    const brand = document.getElementById('brandInput').value;
+    const industry = document.getElementById('industryInput').value;
+
+    if (!brand || !industry) {
+        alert("Lütfen marka ve sektör girin.");
+        return;
     }
 
-    function resetApp() {
-        document.getElementById('brandInput').value = '';
-        document.getElementById('industryInput').value = '';
-        showSection('section-input');
-    }
+    showSection('section-loading');
+    
+    let i = 0;
+    loadingInterval = setInterval(() => {
+        document.getElementById('loadingText').innerText = messages[i % messages.length];
+        i++;
+    }, 1500);
+    
+    // ---------------------------------------------
+    // GÜVENLİ SERVERLESS (FUNCTIONS) ÇAĞRISI
+    // ---------------------------------------------
+    try {
+        document.getElementById('loadingText').innerText = "Güvenli Analiz Başlatılıyor (Backend Functions)...";
 
-    function copyOptText() {
-        const text = document.getElementById('resOptRationale').innerText;
-        navigator.clipboard.writeText(text);
-        alert("Metin kopyalandı!");
-    }
+        // runAnalysis, Functions klasöründeki dosyanın adı olmalı
+        const callFunction = functions.httpsCallable('runAnalysis'); 
+        
+        // Backend'e sadece marka ve sektörü gönder
+        const functionResponse = await callFunction({ brand, industry });
+        const resultJson = functionResponse.data; // Fonksiyon, nihai JSON'ı döndürmelidir
 
-    // LOADING ANIMASYONU
-    let loadingInterval;
-    const messages = [
-        "Gemini Motoruna Bağlanılıyor...",
-        "Google Intelligence Ağını Tarıyor...",
-        "Derin Mantıksal Analiz (Reasoning)...",
-        "Semantik Otorite Puanlanıyor...",
-        "Stratejik Rapor Hazırlanıyor..."
-    ];
-
-    async function startAnalysis() {
-        // Input değerleri alınıyor
-        const brand = document.getElementById('brandInput').value;
-        const industry = document.getElementById('industryInput').value;
-
-        if (!brand || !industry) {
-            alert("Lütfen marka ve sektör girin.");
-            return;
+        if (!resultJson || resultJson.error) {
+            throw new Error(resultJson.error || "Backend analizi başarısız oldu.");
         }
-
-        showSection('section-loading');
         
-        let i = 0;
-        loadingInterval = setInterval(() => {
-            document.getElementById('loadingText').innerText = messages[i % messages.length];
-            i++;
-        }, 1500);
-        
-        // ---------------------------------------------
-        // GÜVENLİ SERVERLESS (FUNCTIONS) ÇAĞRISI
-        // ---------------------------------------------
-        try {
-            document.getElementById('loadingText').innerText = "Güvenli Analiz Başlatılıyor (Backend Functions)...";
+        // 1. Sonuçları Ekrana Bas
+        renderResults(resultJson);
 
-            // runAnalysis, Functions klasöründeki dosyanın adı olmalı
-            const callFunction = functions.httpsCallable('runAnalysis'); 
-            
-            // Backend'e sadece marka ve sektörü gönder
-            const functionResponse = await callFunction({ brand, industry });
-            const resultJson = functionResponse.data; // Fonksiyon, nihai JSON'ı döndürmelidir
+        // 2. Veritabanına Kaydet (Firestore'a kaydetme hala frontend'den)
+        await saveAnalysis(resultJson, brand, industry); 
 
-            if (!resultJson || resultJson.error) {
-                throw new Error(resultJson.error || "Backend analizi başarısız oldu.");
-            }
-            
-            // 1. Sonuçları Ekrana Bas
-            renderResults(resultJson);
-
-            // 2. Veritabanına Kaydet (Firestore'a kaydetme hala frontend'den)
-            await saveAnalysis(resultJson, brand, industry); 
-
-        } catch (error) {
-            clearInterval(loadingInterval);
-            console.error("Kritik Backend/Functions Hatası:", error);
-            alert("Analiz Motoru Hata Verdi. Functions Bağlantı Hatası: " + error.message);
-            resetApp();
-        } finally {
-            clearInterval(loadingInterval);
-        }
+    } catch (error) {
+        clearInterval(loadingInterval);
+        console.error("Kritik Backend/Functions Hatası:", error);
+        alert("Analiz Motoru Hata Verdi. Functions Bağlantı Hatası: " + error.message);
+        resetApp();
+    } finally {
+        clearInterval(loadingInterval);
     }
+}
 
-    function renderResults(data) {
-        // Verileri Yerleştir
-        document.getElementById('resBrandName').innerText = document.getElementById('brandInput').value.toUpperCase();
-        document.getElementById('resScore').innerText = data.score;
-        
-        // Kimlik
-        document.getElementById('resClaimedSector').innerText = data.identityAnalysis.claimedSector;
-        document.getElementById('resDetectedSector').innerText = data.identityAnalysis.detectedSector;
-        
-        const matchStatus = document.getElementById('resMatchStatus');
-        const indicator = document.getElementById('matchIndicator');
-        matchStatus.innerText = data.identityAnalysis.matchStatus;
-        
-        // "ALGI SAPMASI" ve "Yetersiz Veri" için sarı uyarı
-        if (data.identityAnalysis.matchStatus.includes("SAPMASI") || data.identityAnalysis.matchStatus.includes("Yetersiz Veri")) {
-            matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700";
-            indicator.className = "absolute top-0 left-0 w-1 h-full bg-amber-500";
-        } else { // EŞLEŞME DOĞRULANDI
-            matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700";
-            indicator.className = "absolute top-0 left-0 w-1 h-full bg-emerald-500";
-        }
-        document.getElementById('resInsight').innerHTML = `<i data-lucide="search" class="w-4 h-4 text-purple-500 shrink-0"></i> ${data.identityAnalysis.insight}`;
+function renderResults(data) {
+    // Verileri Yerleştir
+    document.getElementById('resBrandName').innerText = document.getElementById('brandInput').value.toUpperCase();
+    document.getElementById('resScore').innerText = data.score;
+    
+    // Kimlik
+    document.getElementById('resClaimedSector').innerText = data.identityAnalysis.claimedSector;
+    document.getElementById('resDetectedSector').innerText = data.identityAnalysis.detectedSector;
+    
+    const matchStatus = document.getElementById('resMatchStatus');
+    const indicator = document.getElementById('matchIndicator');
+    matchStatus.innerText = data.identityAnalysis.matchStatus;
+    
+    // "ALGI SAPMASI" ve "Yetersiz Veri" için sarı uyarı
+    if (data.identityAnalysis.matchStatus.includes("SAPMASI") || data.identityAnalysis.matchStatus.includes("Yetersiz Veri")) {
+        matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700";
+        indicator.className = "absolute top-0 left-0 w-1 h-full bg-amber-500";
+    } else { // EŞLEŞME DOĞRULANDI
+        matchStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700";
+        indicator.className = "absolute top-0 left-0 w-1 h-full bg-emerald-500";
+    }
+    document.getElementById('resInsight').innerHTML = `<i data-lucide="search" class="w-4 h-4 text-purple-500 shrink-0"></i> ${data.identityAnalysis.insight}`;
 
-        // Platformlar (Rank'ler silindi)
-        const platformsDiv = document.getElementById('resPlatforms');
-        platformsDiv.innerHTML = "";
-        data.platforms.forEach((p, index) => {
-            platformsDiv.innerHTML += `
-                <div class="flex items-center justify-between text-sm p-3 bg-slate-50 rounded border border-slate-100 hover:border-purple-200 transition-colors">
-                    <div>
-                        <span class="font-bold text-slate-700 text-xs block">${p.name}</span>
-                        <span class="text-[10px] text-slate-400">Simülasyon Sırası: #${index + 1}</span>
-                    </div>
-                    <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${p.status.includes('Analiz') ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}">${p.status}</span>
-                </div>`;
-        });
-
-        // SWOT
-        document.getElementById('resSummary').innerText = data.strategicSummary;
-        
-        const strList = document.getElementById('resStrengths');
-        strList.innerHTML = "";
-        data.strengths.forEach(s => strList.innerHTML += `<li class="text-xs font-medium text-slate-600 flex items-start gap-2"><span class="text-emerald-400">•</span> ${s}</li>`);
-        
-        const weakList = document.getElementById('resWeaknesses');
-        weakList.innerHTML = "";
-        data.weaknesses.forEach(w => weakList.innerHTML += `<li class="text-xs font-medium text-slate-600 flex items-start gap-2"><span class="text-rose-400">•</span> ${w}</li>`);
-
-        // Rakipler (Direct ve Leaders eklendi)
-        const compList = document.getElementById('resCompetitors');
-        compList.innerHTML = "";
-        
-        const renderCompetitor = (c) => `
-            <div class="flex justify-between text-sm p-3 bg-white rounded border border-slate-200 shadow-sm">
-                <span class="font-bold text-slate-700">${c.name}</span>
-                <span class="text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">${c.status}</span>
+    // Platformlar (Rank'ler silindi)
+    const platformsDiv = document.getElementById('resPlatforms');
+    platformsDiv.innerHTML = "";
+    data.platforms.forEach((p, index) => {
+        platformsDiv.innerHTML += `
+            <div class="flex items-center justify-between text-sm p-3 bg-slate-50 rounded border border-slate-100 hover:border-purple-200 transition-colors">
+                <div>
+                    <span class="font-bold text-slate-700 text-xs block">${p.name}</span>
+                    <span class="text-[10px] text-slate-400">Simülasyon Sırası: #${index + 1}</span>
+                </div>
+                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase ${p.status.includes('Analiz') ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}">${p.status}</span>
             </div>`;
-        
-        compList.innerHTML += `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-2">DOĞRUDAN RAKİPLER</p>`;
-        data.competitors.direct.forEach(c => compList.innerHTML += renderCompetitor(c));
+    });
 
-        compList.innerHTML += `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-4">PAZAR LİDERLERİ</p>`;
-        data.competitors.leaders.forEach(c => compList.innerHTML += renderCompetitor(c));
+    // SWOT
+    document.getElementById('resSummary').innerText = data.strategicSummary;
+    
+    const strList = document.getElementById('resStrengths');
+    strList.innerHTML = "";
+    data.strengths.forEach(s => strList.innerHTML += `<li class="text-xs font-medium text-slate-600 flex items-start gap-2"><span class="text-emerald-400">•</span> ${s}</li>`);
+    
+    const weakList = document.getElementById('resWeaknesses');
+    weakList.innerHTML = "";
+    data.weaknesses.forEach(w => weakList.innerHTML += `<li class="text-xs font-medium text-slate-600 flex items-start gap-2"><span class="text-rose-400">•</span> ${w}</li>`);
+
+    // Rakipler (Direct ve Leaders eklendi)
+    const compList = document.getElementById('resCompetitors');
+    compList.innerHTML = "";
+    
+    const renderCompetitor = (c) => `
+        <div class="flex justify-between text-sm p-3 bg-white rounded border border-slate-200 shadow-sm">
+            <span class="font-bold text-slate-700">${c.name}</span>
+            <span class="text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">${c.status}</span>
+        </div>`;
+    
+    compList.innerHTML += `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-2">DOĞRUDAN RAKİPLER</p>`;
+    data.competitors.direct.forEach(c => compList.innerHTML += renderCompetitor(c));
+
+    compList.innerHTML += `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-4">PAZAR LİDERLERİ</p>`;
+    data.competitors.leaders.forEach(c => compList.innerHTML += renderCompetitor(c));
 
 
-        // Optimizasyon (Objective eklendi)
-        document.getElementById('resOptRationale').innerText = `Hedef: ${data.optimization.objective}\n\n${data.optimization.rationale}`;
-        document.getElementById('resOptText').innerText = data.optimization.text;
+    // Optimizasyon (Objective eklendi)
+    document.getElementById('resOptRationale').innerText = `Hedef: ${data.optimization.objective}\n\n${data.optimization.rationale}`;
+    document.getElementById('resOptText').innerText = data.optimization.text;
 
-        // İkonları yenile (yeni eklenenler için)
-        lucide.createIcons();
-        showSection('section-results');
-    }
+    // İkonları yenile (yeni eklenenler için)
+    lucide.createIcons();
+    showSection('section-results');
+}
 </script>
 </body>
 </html>
