@@ -242,15 +242,19 @@
     // ----------------------------------------------------
     
     // Bu promptlar sadece frontend'de görülmek için burada, backend'e gönderilmiyor.
+    
     const SYSTEM_INSTRUCTION = `
     Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
     Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
+
     KURALLAR:
     1. GERÇEKLİK: Marka hakkında yeterli veri yoksa (çok yeni/çok niş ise) dürüstçe "Yetersiz Veri" de.
     2. KİMLİK KONTROLÜ: Kullanıcının beyanı ile dijital ayak izi uyuşmuyorsa "ALGI SAPMASI" uyarısı ver.
     3. FORMAT: Sadece geçerli JSON döndür.
+
     Marka: {brand}
     Sektör: {industry}
+
     JSON ŞEMASI:
     {
       "score": (0-100 arası sayı. Dijital görünürlük ve algı skoru),
@@ -288,7 +292,7 @@
 
 
     // ----------------------------------------------------
-    // FONKSİYONLAR (SADECE TARAYICI İÇİN OLANLAR)
+    // FONKSİYONLAR
     // ----------------------------------------------------
     
     async function saveAnalysis(analysisData, brand, industry) {
@@ -461,7 +465,5 @@
         showSection('section-results');
     }
 </script>
-</body>
-</html>
 </body>
 </html>
