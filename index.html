@@ -241,56 +241,125 @@
     // ----------------------------------------------------
     // YÖNERGE DEPOLAMA ALANI (DEBUG AMAÇLI GÖRÜNÜR TUTULMUŞTUR)
     // ----------------------------------------------------
-    
-    // Bu promptlar, Backend'de (functions/index.js) de aynı olmalıdır.
-    
-    const SYSTEM_INSTRUCTION = `
-    Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
-    Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
+  // functions/index.js
 
-    KURALLAR:
-    1. GERÇEKLİK: Marka hakkında yeterli veri yoksa (çok yeni/çok niş ise) dürüstçe "Yetersiz Veri" de.
-    2. KİMLİK KONTROLÜ: Kullanıcının beyanı ile dijital ayak izi uyuşmuyorsa "ALGI SAPMASI" uyarısı ver.
-    3. FORMAT: Sadece geçerli JSON döndür.
+const functions = require("firebase-functions");
+const { GoogleGenAI } = require("@google/genai"); 
 
+// 1. SİSTEM TALİMATLARI (GLOBAL SCOPE)
+const SYSTEM_INSTRUCTION = `
+Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
+Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
+
+KURALLAR:
+1. GERÇEKLİK: Marka hakkında yeterli veri yoksa (çok yeni/çok niş ise) dürüstçe "Yetersiz Veri" de.
+2. KİMLİK KONTROLÜ: Kullanıcının beyanı ile dijital ayak izi uyuşmuyorsa "ALGI SAPMASI" uyarısı ver.
+3. FORMAT: Sadece geçerli JSON döndür.
+
+Marka: {brand}
+Sektör: {industry}
+
+JSON ŞEMASI:
+{
+  "score": (0-100 arası sayı. Dijital görünürlük ve algı skoru),
+  "identityAnalysis": {
+    "claimedSector": (str - Kullanıcının girdiği),
+    "detectedSector": (str - Senin tespitin),
+    "matchStatus": ("EŞLEŞME DOĞRULANDI" veya "ALGI SAPMASI" veya "Yetersiz Veri"),
+    "insight": (str - Kısa durum analizi)
+  },
+  "competitors": {
+    "direct": [{"name": "str", "status": "str - Örn: Rakip"}, {"name": "str", "status": "str - Örn: Rakip"}], 
+    "leaders": [{"name": "str", "status": "str - Örn: Lider"}, {"name": "str", "status": "str - Örn: Lider"}]
+  },
+  "strategicSummary": (str - Yönetici özeti),
+  "strengths": [(str - Güçlü1), (str - Güçlü2)],
+  "weaknesses": [(str - Zayıf1), (str - Zayıf2)],
+  "optimization": {
+    "objective": (str - Ana hedef, Örn: Sosyal kanıt artışı),
+    "rationale": (str - Neden bu hedef seçildiğinin analizi),
+    "text": (str - Web sitesi için optimize edilmiş metin)
+  },
+  "platforms": [
+    {"name": "Gemini", "status": "Analiz Edildi"}, 
+    {"name": "GPT-5", "status": "Simüle Edildi"},
+    {"name": "Claude", "status": "Tarandı"}
+  ]
+}
+`;
+
+const RAG_ANALYSIS_INSTRUCTION = `
+    Sen bir pazar istihbarat analistisin. Sana gönderilen Marka ve Sektör bilgisine göre 
+    Google Search RAG aracını kullanarak en güncel (son 6 ay) pazar algısı, rekabet durumu ve önemli haberleri topla.
+    Tüm bulgularını (rakipler, trendler, olumlu/olumsuz algılar) detaylı ve ham metin formatında özetle.
+    KESİNLİKLE JSON formatı kullanma. Çıktın sadece sade metin olmalıdır.
     Marka: {brand}
     Sektör: {industry}
+`;
 
-    JSON ŞEMASI:
-    {
-      "score": (0-100 arası sayı. Dijital görünürlük ve algı skoru),
-      "identityAnalysis": {
-        "claimedSector": (str - Kullanıcının girdiği),
-        "detectedSector": (str - Senin tespitin),
-        "matchStatus": ("EŞLEŞME DOĞRULANDI" veya "ALGI SAPMASI" veya "Yetersiz Veri"),
-        "insight": (str - Kısa durum analizi)
-      },
-      "competitors": {
-        "direct": [{"name": "str", "status": "str - Örn: Rakip"}, {"name": "str", "status": "str - Örn: Rakip"}], 
-        "leaders": [{"name": "str", "status": "str - Örn: Lider"}, {"name": "str", "status": "str - Örn: Lider"}]
-      },
-      "strategicSummary": (str - Yönetici özeti),
-      "strengths": [(str - Güçlü1), (str - Güçlü2)],
-      "weaknesses": [(str - Zayıf1), (str - Zayıf2)],
-      "optimization": {
-        "objective": (str - Ana hedef, Örn: Sosyal kanıt artışı),
-        "rationale": (str - Neden bu hedef seçildiğinin analizi),
-        "text": (str - Web sitesi için optimize edilmiş metin)
-      },
-      "platforms": [
-        {"name": "Gemini", "status": "Analiz Edildi"}, 
-        {"name": "GPT-5", "status": "Simüle Edildi"},
-        {"name": "Claude", "status": "Tarandı"}
-      ]
-    }`;
+const MODEL_ID = "gemini-2.5-flash";
+
+// 2. FONKSİYON TANIMI (CRITICAL FIX: runWith EKLENDİ)
+exports.runAnalysis = functions
+    .region('europe-west1')
+    .runWith({ secrets: ["GEMINI_API_KEY"] }) // <--- İŞTE EKSİK OLAN SİHİRLİ SATIR!
+    .https.onCall(async (data, context) => {
     
-    const RAG_PROMPT = `
-        Sen bir pazar istihbarat analistisin.
-        Marka: {brand}, Sektör: {industry} için Google Search RAG aracını kullanarak en güncel (son 6 ay) pazar algısı, rekabet durumu ve önemli haberleri topla.
-        Tüm bulgularını (rakipler, trendler, olumlu/olumsuz algılar) detaylı ve ham metin formatında özetle.
-        KESİNLİKLE JSON formatı kullanma. Çıktın sadece sade metin olmalıdır.
-    `;
+    // Fonksiyon başladığında API Key'i ortamdan çekiyoruz
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new functions.https.HttpsError('failed-precondition', 'API Key bulunamadı.');
+    }
 
+    const ai = new GoogleGenAI({apiKey: apiKey});
+    const { brand, industry } = data;
+    let raw_rag_data = "Harici veri çekilemedi. Analizi içsel bilgiyle yap."; 
+
+    if (!brand || !industry) {
+        throw new functions.https.HttpsError('invalid-argument', 'Marka ve sektör zorunludur.');
+    }
+
+    // AŞAMA 1: RAG İLE VERİ TOPLAMA
+    try {
+        const ragPrompt = RAG_ANALYSIS_INSTRUCTION.replace('{brand}', brand).replace('{industry}', industry);
+
+        const ragResponse = await ai.models.generateContent({
+            model: MODEL_ID,
+            contents: [{ role: "user", parts: [{ text: ragPrompt }] }],
+            config: {
+                tools: [{ googleSearch: {} }] 
+            }
+        });
+        
+        if (ragResponse.candidates && ragResponse.candidates[0].content.parts[0].text) {
+             raw_rag_data = ragResponse.candidates[0].content.parts[0].text;
+        }
+
+    } catch (error) {
+        console.error("1. Adım (RAG) Başarısız. İçsel bilgiyle devam ediliyor.", error);
+    }
+
+    // AŞAMA 2: JSON FORMATLAMA VE SON ANALİZ
+    try {
+        const fullAnalysisPrompt = `${SYSTEM_INSTRUCTION.replace('{brand}', brand).replace('{industry}', industry)}. Analizini, aşağıdaki ham pazar verisine dayanarak oluştur ve sonucu katı JSON formatında döndür. Ham Veri: """${raw_rag_data}"""`;
+
+        const finalResponse = await ai.models.generateContent({
+            model: MODEL_ID,
+            contents: [{ role: "user", parts: [{ text: fullAnalysisPrompt }] }],
+            config: {
+                responseMimeType: "application/json"
+            }
+        });
+
+        const jsonText = finalResponse.candidates[0].content.parts[0].text;
+        
+        return JSON.parse(jsonText);
+
+    } catch (error) {
+        console.error("2. Adım (JSON Formatlama) Kritik Hata:", error); 
+        throw new functions.https.HttpsError('internal', 'Analiz Motoru Formatlama Hatası: JSON yapısı bozuk.');
+    }
+});
 
     // ----------------------------------------------------
     // FONKSİYONLAR
