@@ -327,22 +327,46 @@
         const tooltip = document.getElementById(tooltipId);
         if (!tooltip) return;
         
+        // Tooltip'i görünür yap (boyutunu ölçebilmek için)
+        tooltip.style.opacity = '0';
+        tooltip.style.display = 'block';
+        
         const card = event.currentTarget;
         const rect = card.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
         
-        let left = rect.left;
-        let top = rect.top - tooltip.offsetHeight - 15;
+        // Mouse pozisyonunu al
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
         
-        if (left + tooltip.offsetWidth > window.innerWidth) {
-            left = window.innerWidth - tooltip.offsetWidth - 20;
+        // Tooltip'i mouse'un yanına yerleştir
+        let left = mouseX + 15; // Mouse'un sağında
+        let top = mouseY - (tooltipRect.height / 2); // Mouse'un ortasında dikey olarak
+        
+        // Sağ kenara taşıyorsa, sol tarafa geç
+        if (left + tooltipRect.width > window.innerWidth - 20) {
+            left = mouseX - tooltipRect.width - 15;
         }
         
-        if (top < 0) {
-            top = rect.bottom + 15;
+        // Sol kenara taşıyorsa, sınırda tut
+        if (left < 20) {
+            left = 20;
+        }
+        
+        // Üst kenara taşıyorsa, aşağı kaydır
+        if (top < 20) {
+            top = 20;
+        }
+        
+        // Alt kenara taşıyorsa, yukarı kaydır
+        if (top + tooltipRect.height > window.innerHeight - 20) {
+            top = window.innerHeight - tooltipRect.height - 20;
         }
         
         tooltip.style.left = left + 'px';
-        tooltip.style.top = top + window.scrollY + 'px';
+        tooltip.style.top = (top + window.scrollY) + 'px';
+        tooltip.style.opacity = '';
+        tooltip.style.display = '';
         tooltip.classList.add('show');
     }
 
@@ -469,7 +493,7 @@
                 // Metrik Kartı
                 metricsDiv.innerHTML += `
                     <div class="metric-card bg-slate-950 p-5 rounded-xl border border-slate-800 shadow-lg" 
-                         onmouseenter="showTooltip(event, '${tooltipId}')" 
+                         onmousemove="showTooltip(event, '${tooltipId}')" 
                          onmouseleave="hideTooltip('${tooltipId}')">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">${metric.name}</h4>
@@ -490,7 +514,7 @@
                 `;
                 
                 if (metric.breakdown) {
-                    tooltipContent += `<div class="space-y-2 pt-2 border-t border-slate-700">`;
+                    tooltipContent += '<div class="space-y-2 pt-2 border-t border-slate-700">';
                     metric.breakdown.forEach(item => {
                         if (item.name) {
                             tooltipContent += `
@@ -508,7 +532,7 @@
                             `;
                         }
                     });
-                    tooltipContent += `</div>`;
+                    tooltipContent += '</div>';
                 }
                 
                 if (metric.improvement) {
