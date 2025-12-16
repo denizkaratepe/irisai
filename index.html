@@ -11,11 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Matrix / Dark Mode Temel Ayarlar */
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #e2e8f0; overflow-x: hidden; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* Göz Animasyonları (Matrix Yeşili) */
         @keyframes lookAround {
             0%, 100% { transform: translateX(0) translateY(0); }
             20% { transform: translateX(0) translateY(0); }
@@ -27,11 +25,9 @@
             0%, 45%, 55%, 100% { transform: scaleY(1); }
             50% { transform: scaleY(0.05); }
         }
-        /* Göz Bebeği Rengi: Emerald-500 (#10b981) */
         .digital-eye-pupil { animation: lookAround 8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
         .digital-eye-lid { animation: blink 6s infinite ease-in-out; animation-delay: 2s; }
         
-        /* Geçiş Efektleri */
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         .slide-up { animation: slideUp 0.7s ease-out forwards; }
         
@@ -39,9 +35,56 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { transform: translateY(0); } }
 
         .hidden-section { display: none; }
-        
-        /* Matrix Glow Efekti */
         .matrix-glow { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+        
+        .tooltip {
+            position: fixed;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 400px;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .metric-card {
+            cursor: help;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+        }
+        
+        .score-card-clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .score-card-clickable:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.2);
+        }
+        
+        .breakdown-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+        
+        .breakdown-section.open {
+            max-height: 500px;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="selection:bg-emerald-900 selection:text-emerald-200">
@@ -112,17 +155,47 @@
         </div>
 
         <div id="section-results" class="hidden-section w-full pb-20 slide-up">
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-slate-800 pb-6">
-                <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <h1 class="text-2xl font-black text-white tracking-tight">Analiz Raporu</h1>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-900">CONFIDENTIAL</span>
+            <div class="bg-slate-900 rounded-2xl border-2 border-slate-800 p-8 mb-8 relative overflow-hidden score-card-clickable" onclick="toggleScoreBreakdown()">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <h1 class="text-2xl font-black text-white tracking-tight">Analiz Raporu</h1>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-900">CONFIDENTIAL</span>
+                            </div>
+                            <p id="resBrandName" class="text-slate-500 text-sm font-mono uppercase mb-2">BRAND</p>
+                            <p class="text-[10px] text-slate-600 font-mono flex items-center gap-1">
+                                <i data-lucide="mouse-pointer-click" class="w-3 h-3"></i>
+                                TIKLAYARAK SKOR DAĞILIMINI GÖRÜNTÜLEYIN
+                            </p>
+                        </div>
+                        <div class="text-left md:text-right">
+                            <div id="resScore" class="text-6xl font-black text-emerald-500 tracking-tighter">0</div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Genel Performans Skoru</div>
+                        </div>
                     </div>
-                    <p id="resBrandName" class="text-slate-500 text-sm font-mono uppercase">BRAND</p>
+
+                    <div id="scoreBreakdown" class="breakdown-section mt-6 pt-6 border-t border-slate-800">
+                        <p class="text-xs text-slate-400 mb-4 flex items-center gap-2">
+                            <i data-lucide="info" class="w-4 h-4 text-emerald-500"></i>
+                            <span>Bu skor, 3 ana metriğin ağırlıklı ortalamasıdır:</span>
+                        </p>
+                        
+                        <div id="scoreBreakdownContent" class="space-y-2"></div>
+                    </div>
                 </div>
-                <div class="text-left md:text-right">
-                    <div id="resScore" class="text-4xl font-black text-white tracking-tighter">0</div>
-                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Görünürlük Skoru</div>
+            </div>
+
+            <div class="mt-6 mb-8">
+                <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl">
+                    <h3 class="text-lg font-black text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-500"></i> Alt Metrik Analizi
+                    </h3>
+                    <p id="resScoreRationale" class="text-sm text-slate-400 mb-6 border-l-4 border-slate-800 pl-3">...</p>
+                    
+                    <div id="resMetrics" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
                 </div>
             </div>
 
@@ -165,8 +238,7 @@
                     <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <i data-lucide="globe" class="w-3 h-3"></i> Motor Durumu
                     </h3>
-                    <div id="resPlatforms" class="space-y-3">
-                        </div>
+                    <div id="resPlatforms" class="space-y-3"></div>
                 </div>
 
                 <div class="lg:col-span-2 space-y-6">
@@ -217,64 +289,13 @@
 
     </main>
 
+    <div id="tooltipContainer"></div>
+
    <script>
-    // İkonları başlat
     lucide.createIcons();
 
-    // ----------------------------------------------------
-    // CONFIG (DOĞRUDAN VERCEL MİMARİSİ)
-    // ----------------------------------------------------
-    
-    // ⚠️ VERCEL GÜVENLİK AYARI: Bu URL, API anahtarını güvenli arka uca gönderir.
     const VERCEL_BACKEND_URL = "https://irisai-one.vercel.app/api/analyze";
-    
-    // ----------------------------------------------------
-    // SYSTEM INSTRUCTION (PROMPT - Backend'e gönderilir)
-    // ----------------------------------------------------
-    const SYSTEM_INSTRUCTION = `
-    Sen Iris, Gemini Teknolojisiyle çalışan en gelişmiş Marka İstihbarat Analistisin.
-    Görevin: Markayı analiz etmek ve sadece aşağıdaki JSON formatında çıktı vermek. Başka hiçbir şey yazma.
 
-    KURALLAR:
-    1. GERÇEKLİK: Marka hakkında yeterli veri yoksa dürüstçe "Yetersiz Veri" de.
-    2. KİMLİK KONTROLÜ: Kullanıcının beyanı ile dijital ayak izi uyuşmuyorsa "ALGI SAPMASI" uyarısı ver.
-    3. FORMAT: Sadece geçerli JSON döndür.
-
-    Marka: {brand}
-    Sektör: {industry}
-
-    JSON ŞEMASI:
-    {
-      "score": (0-100 arası sayı),
-      "identityAnalysis": {
-        "claimedSector": (str),
-        "detectedSector": (str),
-        "matchStatus": ("EŞLEŞME DOĞRULANDI" veya "ALGI SAPMASI" veya "Yetersiz Veri"),
-        "insight": (str)
-      },
-      "competitors": {
-        "direct": [{"name": "str", "status": "str"}], 
-        "leaders": [{"name": "str", "status": "str"}]
-      },
-      "strategicSummary": (str),
-      "strengths": [(str), (str)],
-      "weaknesses": [(str), (str)],
-      "optimization": {
-        "objective": (str),
-        "rationale": (str),
-        "text": (str)
-      },
-      "platforms": [
-        {"name": "Gemini", "status": "Analiz Edildi"}, 
-        {"name": "GPT-5", "status": "Simüle Edildi"},
-        {"name": "Claude", "status": "Tarandı"}
-      ]
-    }`;
-
-    // ----------------------------------------------------
-    // UI VE ANALİZ FONKSİYONLARI
-    // ----------------------------------------------------
-    
     function showSection(id) {
         ['section-input', 'section-loading', 'section-results'].forEach(sec => {
             document.getElementById(sec).classList.add('hidden-section');
@@ -286,6 +307,7 @@
         document.getElementById('brandInput').value = '';
         document.getElementById('industryInput').value = '';
         showSection('section-input');
+        document.getElementById('tooltipContainer').innerHTML = '';
     }
 
     function copyOptText() {
@@ -293,6 +315,49 @@
         navigator.clipboard.writeText(text);
         alert("Metin kopyalandı!");
     }
+
+    function toggleScoreBreakdown() {
+        const breakdown = document.getElementById('scoreBreakdown');
+        breakdown.classList.toggle('open');
+    }
+
+    function showTooltip(event, tooltipId) {
+        document.querySelectorAll('.tooltip').forEach(t => t.classList.remove('show'));
+        
+        const tooltip = document.getElementById(tooltipId);
+        if (!tooltip) return;
+        
+        const card = event.currentTarget;
+        const rect = card.getBoundingClientRect();
+        
+        let left = rect.left;
+        let top = rect.top - tooltip.offsetHeight - 15;
+        
+        if (left + tooltip.offsetWidth > window.innerWidth) {
+            left = window.innerWidth - tooltip.offsetWidth - 20;
+        }
+        
+        if (top < 0) {
+            top = rect.bottom + 15;
+        }
+        
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + window.scrollY + 'px';
+        tooltip.classList.add('show');
+    }
+
+    function hideTooltip(tooltipId) {
+        const tooltip = document.getElementById(tooltipId);
+        if (tooltip) {
+            tooltip.classList.remove('show');
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.metric-card') && !e.target.closest('.tooltip')) {
+            document.querySelectorAll('.tooltip').forEach(t => t.classList.remove('show'));
+        }
+    });
 
     let loadingInterval;
     const messages = [
@@ -304,16 +369,11 @@
     ];
 
     async function startAnalysis() {
-        const brand = document.getElementById('brandInput').value;
-        const industry = document.getElementById('industryInput').value;
+        const brand = document.getElementById('brandInput').value.trim();
+        const industry = document.getElementById('industryInput').value.trim();
 
         if (!brand || !industry) {
             alert("Lütfen marka ve sektör girin.");
-            return;
-        }
-        
-        if (VERCEL_BACKEND_URL.includes("SENIN-PROJE-ADIN")) {
-            alert("Lütfen index.html içindeki Vercel URL'ini güncelleyin!");
             return;
         }
 
@@ -326,15 +386,12 @@
         }, 1500);
 
         try {
-            // BACKEND'E MARKA VE SEKTÖRÜ GÖNDERME
             const response = await fetch(VERCEL_BACKEND_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     brand: brand, 
-                    industry: industry,
-                    // SYSTEM_INSTRUCTION'ı backend'e gönderir (Çünkü backend'de JSON schema'sı var)
-                    systemInstruction: SYSTEM_INSTRUCTION
+                    industry: industry
                 }),
             });
 
@@ -345,9 +402,7 @@
             }
 
             const resultJson = await response.json();
-            
-            // Sonuçları Ekrana Bas
-            renderResults(resultJson);
+            renderResults(resultJson, brand);
 
         } catch (error) {
             console.error("Kritik Hata:", error);
@@ -358,12 +413,16 @@
         }
     }
 
-    function renderResults(data) {
-        // Verileri Yerleştir
-        document.getElementById('resBrandName').innerText = document.getElementById('brandInput').value.toUpperCase();
+    function renderResults(data, brandName) {
+        document.getElementById('resBrandName').innerText = brandName.toUpperCase();
         document.getElementById('resScore').innerText = data.score;
         
-        // Kimlik
+        // Score Rationale
+        if (data.scoreRationale) {
+            document.getElementById('resScoreRationale').innerText = data.scoreRationale;
+        }
+        
+        // Kimlik Analizi
         document.getElementById('resClaimedSector').innerText = data.identityAnalysis.claimedSector;
         document.getElementById('resDetectedSector').innerText = data.identityAnalysis.detectedSector;
         
@@ -380,30 +439,123 @@
         }
         document.getElementById('resInsight').innerHTML = `<i data-lucide="search" class="w-4 h-4 text-emerald-500 shrink-0"></i> ${data.identityAnalysis.insight}`;
 
+        // Score Breakdown
+        if (data.metrics) {
+            const breakdownContent = document.getElementById('scoreBreakdownContent');
+            breakdownContent.innerHTML = '';
+            
+            Object.keys(data.metrics).forEach(key => {
+                const metric = data.metrics[key];
+                breakdownContent.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-slate-950 rounded border border-slate-800">
+                        <span class="text-xs font-bold text-slate-300">${metric.name}</span>
+                        <span class="text-lg font-black text-emerald-400">${metric.value}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Metrikler (Tooltip'li Kartlar)
+        if (data.metrics) {
+            const metricsDiv = document.getElementById('resMetrics');
+            const tooltipContainer = document.getElementById('tooltipContainer');
+            metricsDiv.innerHTML = '';
+            tooltipContainer.innerHTML = '';
+            
+            Object.keys(data.metrics).forEach((key, index) => {
+                const metric = data.metrics[key];
+                const tooltipId = `tooltip-${key}`;
+                
+                // Metrik Kartı
+                metricsDiv.innerHTML += `
+                    <div class="metric-card bg-slate-950 p-5 rounded-xl border border-slate-800 shadow-lg" 
+                         onmouseenter="showTooltip(event, '${tooltipId}')" 
+                         onmouseleave="hideTooltip('${tooltipId}')">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">${metric.name}</h4>
+                            <i data-lucide="info" class="w-4 h-4 text-emerald-500"></i>
+                        </div>
+                        <div class="text-3xl font-black text-white mb-2">${metric.value}</div>
+                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                            <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000" style="width: ${metric.value}%"></div>
+                        </div>
+                    </div>
+                `;
+                
+                // Tooltip İçeriği
+                let tooltipContent = `
+                    <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-2xl">
+                        <h5 class="text-sm font-bold text-white mb-2">${metric.name}</h5>
+                        <p class="text-xs text-slate-300 mb-3 leading-relaxed">${metric.rationale}</p>
+                `;
+                
+                if (metric.breakdown) {
+                    tooltipContent += `<div class="space-y-2 pt-2 border-t border-slate-700">`;
+                    metric.breakdown.forEach(item => {
+                        if (item.name) {
+                            tooltipContent += `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">${item.name}</span>
+                                    <span class="text-emerald-400 font-bold">${item.rawValue || item.percentage || item.matchRate}</span>
+                                </div>
+                            `;
+                        } else if (item.aspect) {
+                            tooltipContent += `
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-400">${item.aspect}</span>
+                                    <span class="text-emerald-400 font-bold">${item.matchRate}%</span>
+                                </div>
+                            `;
+                        }
+                    });
+                    tooltipContent += `</div>`;
+                }
+                
+                if (metric.improvement) {
+                    tooltipContent += `
+                        <div class="mt-3 pt-3 border-t border-slate-700">
+                            <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">İyileştirme Önerisi</p>
+                            <p class="text-xs text-slate-300">${metric.improvement}</p>
+                        </div>
+                    `;
+                }
+                
+                tooltipContent += `</div>`;
+                
+                tooltipContainer.innerHTML += `<div id="${tooltipId}" class="tooltip">${tooltipContent}</div>`;
+            });
+        }
+
         // Platformlar
         const platformsDiv = document.getElementById('resPlatforms');
         platformsDiv.innerHTML = "";
-        data.platforms.forEach((p, index) => {
-            platformsDiv.innerHTML += `
-                <div class="flex items-center justify-between text-sm p-3 bg-slate-900 rounded border border-slate-800 hover:border-emerald-800 transition-colors">
-                    <div>
-                        <span class="font-bold text-slate-300 text-xs block">${p.name}</span>
-                        <span class="text-[10px] text-slate-500">Durum: ${p.status}</span>
-                    </div>
-                    <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-emerald-950 text-emerald-500 border border-emerald-900/50">OK</span>
-                </div>`;
-        });
+        if (data.platforms) {
+            data.platforms.forEach((p) => {
+                platformsDiv.innerHTML += `
+                    <div class="flex items-center justify-between text-sm p-3 bg-slate-900 rounded border border-slate-800 hover:border-emerald-800 transition-colors">
+                        <div>
+                            <span class="font-bold text-slate-300 text-xs block">${p.name}</span>
+                            <span class="text-[10px] text-slate-500">Durum: ${p.status}</span>
+                        </div>
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-emerald-950 text-emerald-500 border border-emerald-900/50">OK</span>
+                    </div>`;
+            });
+        }
 
         // SWOT
-        document.getElementById('resSummary').innerText = data.strategicSummary;
+        document.getElementById('resSummary').innerText = data.strategicSummary || "Analiz tamamlandı.";
         
         const strList = document.getElementById('resStrengths');
         strList.innerHTML = "";
-        data.strengths.forEach(s => strList.innerHTML += `<li class="text-xs font-medium text-slate-400 flex items-start gap-2"><span class="text-emerald-500">•</span> ${s}</li>`);
+        if (data.strengths) {
+            data.strengths.forEach(s => strList.innerHTML += `<li class="text-xs font-medium text-slate-400 flex items-start gap-2"><span class="text-emerald-500">•</span> ${s}</li>`);
+        }
         
         const weakList = document.getElementById('resWeaknesses');
         weakList.innerHTML = "";
-        data.weaknesses.forEach(w => weakList.innerHTML += `<li class="text-xs font-medium text-slate-400 flex items-start gap-2"><span class="text-rose-500">•</span> ${w}</li>`);
+        if (data.weaknesses) {
+            data.weaknesses.forEach(w => weakList.innerHTML += `<li class="text-xs font-medium text-slate-400 flex items-start gap-2"><span class="text-rose-500">•</span> ${w}</li>`);
+        }
 
         // Rakipler
         const compList = document.getElementById('resCompetitors');
@@ -415,17 +567,24 @@
                 <span class="text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${c.status}</span>
             </div>`;
         
-        compList.innerHTML += `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 mt-2">DOĞRUDAN RAKİPLER</p>`;
-        data.competitors.direct.forEach(c => compList.innerHTML += renderCompetitor(c));
+        if (data.competitors) {
+            if (data.competitors.direct && data.competitors.direct.length > 0) {
+                compList.innerHTML += `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 mt-2">DOĞRUDAN RAKİPLER</p>`;
+                data.competitors.direct.forEach(c => compList.innerHTML += renderCompetitor(c));
+            }
 
-        compList.innerHTML += `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 mt-4">PAZAR LİDERLERİ</p>`;
-        data.competitors.leaders.forEach(c => compList.innerHTML += renderCompetitor(c));
+            if (data.competitors.leaders && data.competitors.leaders.length > 0) {
+                compList.innerHTML += `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 mt-4">PAZAR LİDERLERİ</p>`;
+                data.competitors.leaders.forEach(c => compList.innerHTML += renderCompetitor(c));
+            }
+        }
 
         // Optimizasyon
-        document.getElementById('resOptRationale').innerText = `HEDEF: ${data.optimization.objective}\n\nANALİZ: ${data.optimization.rationale}`;
-        document.getElementById('resOptText').innerText = data.optimization.text;
+        if (data.optimization) {
+            document.getElementById('resOptRationale').innerText = `HEDEF: ${data.optimization.objective}\n\nANALİZ: ${data.optimization.rationale}`;
+            document.getElementById('resOptText').innerText = data.optimization.text;
+        }
 
-        // İkonları yenile
         lucide.createIcons();
         showSection('section-results');
     }
